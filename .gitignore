@@ -1,0 +1,41 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+dist-ssr/
+*.tsbuildinfo
+.vite/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# 仅面向 Windows，npx tauri icon 附带生成的移动端图标不入库
+src-tauri/icons/android/
+src-tauri/icons/ios/
+
+# Vditor 离线资源：构建时由 scripts/sync-vditor.mjs 从 node_modules 复制，不入库
+public/vditor/
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.local
+
+# 环境变量（可能含敏感信息）
+.env
+.env.*
+!.env.example
+
+# 编辑器与系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.history/
+.DS_Store
+Thumbs.db
+desktop.ini

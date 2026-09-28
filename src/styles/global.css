@@ -1,0 +1,101 @@
+/* ========== NoteDash 全局主题：墨与纸 ========== */
+/* 浅色（默认） */
+:root {
+  --paper: #f6f2ea;
+  --paper-soft: #fbf9f4;
+  --ink: #24201a;
+  --ink-soft: #6b6257;
+  --ink-faint: #a89e90;
+  --line: #e5ded0;
+  --line-strong: #cfc6b4;
+  --accent: #b5432f;
+  --accent-soft: rgba(181, 67, 47, 0.08);
+  --shadow: 0 14px 34px -14px rgba(58, 46, 32, 0.3);
+  --code-bg: #efe9dc;
+  --hover-bg: rgba(36, 32, 26, 0.055);
+  --glow-1: rgba(181, 67, 47, 0.045);
+  --glow-2: rgba(120, 100, 70, 0.055);
+
+  --font-serif: "Songti SC", "SimSun", "Noto Serif SC", Georgia, serif;
+  --font-sans: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
+
+  color-scheme: light;
+}
+
+/* 深色 */
+html[data-theme="dark"] {
+  --paper: #191713;
+  --paper-soft: #211d18;
+  --ink: #ece5d9;
+  --ink-soft: #a99f90;
+  --ink-faint: #6f665a;
+  --line: #2f2a22;
+  --line-strong: #413a30;
+  --accent: #d4654c;
+  --accent-soft: rgba(212, 101, 76, 0.15);
+  --shadow: 0 16px 38px -16px rgba(0, 0, 0, 0.75);
+  --code-bg: #262119;
+  --hover-bg: rgba(236, 229, 217, 0.07);
+  --glow-1: rgba(212, 101, 76, 0.06);
+  --glow-2: rgba(120, 100, 70, 0.07);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background-color: var(--paper);
+  /* 极淡的暖色晕染，制造纸张氛围；随主题切换 */
+  background-image:
+    radial-gradient(circle at 16% 10%, var(--glow-1), transparent 40%),
+    radial-gradient(circle at 86% 90%, var(--glow-2), transparent 44%);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* 细窄滚动条，贴合整体气质并跟随主题 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: content-box;
+  background-color: var(--line-strong);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-faint);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+button {
+  font-family: inherit;
+}
