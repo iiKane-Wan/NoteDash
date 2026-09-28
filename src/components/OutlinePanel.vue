@@ -62,7 +62,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onEscape, true));
   position: absolute;
   inset: 0;
   z-index: 30;
-  background: rgba(36, 32, 26, 0.06);
+  background: var(--mask);
 }
 
 .outline {
@@ -140,6 +140,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onEscape, true));
   margin: 0;
   padding: 6px 0;
   overflow-y: auto;
+  /* 占满面板剩余高度，条目较多时仅在面板内部滚动 */
+  flex: 1;
+  min-height: 0;
 }
 
 .outline__item {

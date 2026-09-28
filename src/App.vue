@@ -135,6 +135,8 @@ onBeforeUnmount(() => {
   display: grid;
   /* 左三分之一 / 右三分之二 */
   grid-template-columns: minmax(280px, 1fr) 2fr;
+  /* 锁定行高：否则内容会把 auto 行撑开，导致整体溢出视口、内部区域反而滚不动 */
+  grid-template-rows: minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
 }
@@ -143,6 +145,9 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* 约束自身高度，保证列表只在本列内部滚动 */
+  min-height: 0;
+  overflow: hidden;
   border-right: 1px solid var(--line);
   background: var(--paper);
 }
@@ -201,7 +206,7 @@ onBeforeUnmount(() => {
 }
 
 .sidebar__new:hover {
-  color: #fff;
+  color: var(--accent-contrast);
   border-color: var(--accent);
   background: var(--accent);
 }
@@ -252,6 +257,9 @@ onBeforeUnmount(() => {
 .stage {
   position: relative;
   min-width: 0;
+  /* 约束高度，编辑器内容不得撑开本列 */
+  min-height: 0;
+  overflow: hidden;
   background: var(--paper);
 }
 

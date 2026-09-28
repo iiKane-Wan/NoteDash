@@ -70,6 +70,8 @@ function onDelete(id: number) {
   padding: 4px 0 12px;
   overflow-y: auto;
   flex: 1;
+  /* 显式声明最小高度，确保内容变多时只在本区域内滚动，不撑高侧栏 */
+  min-height: 0;
 }
 
 .list__empty {
@@ -107,7 +109,7 @@ function onDelete(id: number) {
 }
 
 .list__item:hover {
-  background: rgba(36, 32, 26, 0.035);
+  background: var(--hover-bg);
 }
 
 .list__item.is-active {
@@ -171,7 +173,7 @@ function onDelete(id: number) {
 .list__delete.is-pending {
   opacity: 1;
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
   background: var(--accent);
   font-size: 11px;
 }

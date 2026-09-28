@@ -181,7 +181,7 @@ const THEMES: { value: ThemeMode; label: string }[] = [
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(20, 16, 12, 0.34);
+  background: var(--mask);
   backdrop-filter: blur(2px);
 }
 
@@ -326,7 +326,7 @@ const THEMES: { value: ThemeMode; label: string }[] = [
 
 .switch.is-on .switch__knob {
   transform: translateX(18px);
-  background: #fff;
+  background: var(--accent-contrast);
 }
 
 /* 次级按钮 */
@@ -383,7 +383,7 @@ const THEMES: { value: ThemeMode; label: string }[] = [
 }
 
 .segmented__item.is-active {
-  color: #fff;
+  color: var(--accent-contrast);
   background: var(--accent);
 }
 </style>

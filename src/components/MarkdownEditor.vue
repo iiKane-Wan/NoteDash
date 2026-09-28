@@ -59,10 +59,18 @@ function openOutline() {
   showOutline.value = true;
 }
 
-/** 点击大纲项：滚动到对应标题并关闭面板 */
+/**
+ * 点击大纲项：只滚动编辑区到对应标题，并关闭面板。
+ * 这里刻意不用 scrollIntoView —— 它会沿着祖先链滚动所有可滚动容器
+ * （overflow:hidden 的元素也能被 JS 程序化滚动），会把左侧列表一起带走。
+ */
 function jumpTo(item: OutlineItem) {
   showOutline.value = false;
-  item.el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scroller = irRoot?.querySelector<HTMLElement>(".vditor-reset");
+  if (!scroller) return;
+  // offsetTop 相对最近的定位祖先 .vditor-ir，减去滚动容器自身偏移即为内容内偏移
+  const offset = item.el.offsetTop - scroller.offsetTop;
+  scroller.scrollTo({ top: Math.max(0, offset - 12), behavior: "smooth" });
 }
 
 onMounted(() => {
@@ -262,11 +270,36 @@ onBeforeUnmount(() => {
   position: relative;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
   background: var(--paper);
 }
 
 .editor__vditor {
   height: 100%;
+}
+
+/* 修复编辑区滚动：用 flex 建立滚动容器，不依赖百分比高度的解析结果。
+   .vditor-content 裁剪溢出，.vditor-ir 纵向排列，
+   <pre.vditor-reset> 占满剩余高度并成为唯一滚动区。
+   box-sizing 保证 Vditor 用 JS 写入的 padding 计入高度。 */
+.editor__vditor :deep(.vditor-content) {
+  overflow: hidden;
+}
+
+.editor__vditor :deep(.vditor-ir) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor__vditor :deep(.vditor-ir > .vditor-reset) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  /* <pre> 自带上下 margin，作为 flex 子项会挤占滚动区 */
+  margin: 0;
 }
 
 /* 抹平 Vditor 默认外观：全部配色改为引用应用主题变量，
@@ -292,7 +325,7 @@ onBeforeUnmount(() => {
   --resize-icon-color: var(--ink-faint);
   --resize-background-color: var(--paper-soft);
   --resize-hover-background-color: var(--accent);
-  --resize-hover-icon-color: #fff;
+  --resize-hover-icon-color: var(--accent-contrast);
 }
 
 .editor__vditor :deep(.vditor-toolbar) {
