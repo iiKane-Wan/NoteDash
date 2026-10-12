@@ -18,6 +18,9 @@ src-tauri/icons/ios/
 # Vditor 离线资源：构建时由 scripts/sync-vditor.mjs 从 node_modules 复制，不入库
 public/vditor/
 
+# CodeGraph 本地代码图谱索引（由 codegraph init 生成，仅本机使用）
+.codegraph/
+
 # 日志与临时文件
 *.log
 npm-debug.log*

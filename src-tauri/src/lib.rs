@@ -9,7 +9,7 @@ use std::sync::Mutex;
 
 use rusqlite::Connection;
 use tauri::{Emitter, Manager, WindowEvent};
-use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use settings::Settings;
 
@@ -31,11 +31,21 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
-            None,
+            // 开机自启时带上 --silent：启动后只驻留托盘，不弹出主窗口
+            Some(vec!["--silent"]),
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
             let handle = app.handle().clone();
+
+            // 静默启动（开机自启）：窗口保持隐藏、仅驻留托盘，
+            // 用户可通过托盘菜单或全局快捷键唤出。手动启动则正常显示。
+            let silent = std::env::args().any(|arg| arg == "--silent");
+            if !silent {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                }
+            }
 
             // 启动即完成数据库定位与初始化
             let db_path = db::resolve_db_path(&handle)?;
@@ -45,8 +55,22 @@ pub fn run() {
             // 以系统实际状态为准，纠正开机自启设置项
             if let Some(actual) = commands::sync_autostart(&handle) {
                 settings.autostart = actual;
+                if actual {
+                    // 幂等刷新注册表：让已有的启动项升级为带 --silent 参数
+                    let _ = handle.autolaunch().enable();
+                }
             }
             let _ = settings.save(&conn);
+
+            // 窗口显示前先应用已保存的主题，避免标题栏出现一次颜色跳变
+            let theme = match settings.theme.as_str() {
+                "light" => Some(tauri::Theme::Light),
+                "dark" => Some(tauri::Theme::Dark),
+                _ => None, // system：交还系统决定
+            };
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_theme(theme);
+            }
 
             // 托盘失败不阻断启动，应用核心功能仍可用
             if let Err(err) = tray::init(app) {
