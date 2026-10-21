@@ -35,6 +35,8 @@ pub fn run() {
             Some(vec!["--silent"]),
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        // 外部链接统一交给系统默认浏览器打开
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let handle = app.handle().clone();
 

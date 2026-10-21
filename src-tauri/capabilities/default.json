@@ -2,5 +2,9 @@
   "identifier": "default",
   "description": "NoteDash 默认权限集",
   "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-set-theme"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-theme",
+    "opener:default"
+  ]
 }

@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import type { Note } from "../api/notes";
 import { useTheme } from "../composables/useTheme";
 import { collectOutline, type OutlineItem } from "../utils/outline";
@@ -53,6 +54,48 @@ function onTitleInput(event: Event) {
   emit("edit", value, vditor?.getValue() ?? props.note.content);
 }
 
+/** 从点击目标解析链接地址：IR 模式取源码标记，其余情况取 <a href> */
+function resolveLinkUrl(target: EventTarget | null): string | null {
+  const el = target instanceof Element ? target : null;
+  if (!el) return null;
+
+  const node = el.closest<HTMLElement>('[data-type="a"]');
+  if (node) {
+    const marker = node.querySelector<HTMLElement>(
+      ":scope > .vditor-ir__marker--link",
+    );
+    const raw = marker?.textContent?.trim();
+    return raw ? raw : null;
+  }
+
+  return (
+    el.closest<HTMLAnchorElement>("a[href]")?.getAttribute("href")?.trim() ||
+    null
+  );
+}
+
+/** 只放行 http/https/mailto，相对路径、锚点、javascript: 等一律忽略 */
+function isExternalUrl(url: string): boolean {
+  return /^(https?:|mailto:)/i.test(url);
+}
+
+/**
+ * 正文链接：Ctrl / Cmd + 单击才用系统默认浏览器打开，
+ * 普通单击仍然交给 Vditor 处理光标与展开。
+ */
+function onEditorClick(event: MouseEvent) {
+  if (!event.ctrlKey && !event.metaKey) return;
+
+  const url = resolveLinkUrl(event.target);
+  if (!url || !isExternalUrl(url)) return;
+
+  // 仅阻止 WebView 自身的默认动作；Vditor 侧因 link.isOpen 为 false 不会重复打开
+  event.preventDefault();
+  void openUrl(url).catch((err) => {
+    console.error("[NoteDash] 打开链接失败：", err);
+  });
+}
+
 function openOutline() {
   if (!irRoot) return;
   outlineItems.value = collectOutline(irRoot);
@@ -74,6 +117,9 @@ function jumpTo(item: OutlineItem) {
 }
 
 onMounted(() => {
+  // 捕获阶段监听：Ctrl/Cmd+单击链接时先于 Vditor 自身处理
+  editorRef.value?.addEventListener("click", onEditorClick, true);
+
   vditor = new Vditor(editorRef.value as HTMLDivElement, {
     // ir = 即时渲染（所见即所得），输入 Markdown 语法立刻呈现格式
     mode: "ir",
@@ -90,6 +136,8 @@ onMounted(() => {
       hljs: { style: isDark.value ? "github-dark" : "github" },
     },
     cache: { enable: false },
+    // 关闭 Vditor 自带的 window.open，改由 Ctrl+单击走系统浏览器
+    link: { isOpen: false },
     outline: { enable: false, position: "left" },
     resize: { enable: false },
     counter: { enable: false },
@@ -138,6 +186,7 @@ watch(
 watch(isDark, () => syncVditorTheme());
 
 onBeforeUnmount(() => {
+  editorRef.value?.removeEventListener("click", onEditorClick, true);
   vditor?.destroy();
   vditor = null;
 });
